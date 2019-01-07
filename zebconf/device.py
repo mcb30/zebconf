@@ -28,8 +28,9 @@ class ZebraDevice(object):
 
     config = ZebraConfigRoot()
 
-    def __init__(self, path=DEFAULT_PATH):
-        self.path = pathlib.Path(path)
+    def __init__(self, path=None):
+        self.path = pathlib.Path(path if path is not None
+                                 else self.DEFAULT_PATH)
         self.sel = selectors.DefaultSelector()
         self.fh = None
 
