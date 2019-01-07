@@ -8,6 +8,9 @@ from .config import ZebraConfigRoot
 class ZebraDevice(object):
     """A Zebra printer device"""
 
+    DEFAULT_PATH = '/dev/usb/lp0'
+    """Default path to Zebra device"""
+
     MAX_RESPONSE_LEN = 16384
     """Maximum expected response length for any command"""
 
@@ -16,7 +19,7 @@ class ZebraDevice(object):
 
     config = ZebraConfigRoot()
 
-    def __init__(self, path='/dev/usb/lp0'):
+    def __init__(self, path=DEFAULT_PATH):
         self.path = pathlib.Path(path)
         self.sel = selectors.DefaultSelector()
         self.fh = None
