@@ -23,7 +23,7 @@ class ZebraDevice(object):
     MAX_RESPONSE_LEN = 16384
     """Maximum expected response length for any command"""
 
-    DEFAULT_TIMEOUT = 0.5
+    DEFAULT_TIMEOUT = 2.0
     """Timeout used when reading from device"""
 
     config = ZebraConfigRoot()
@@ -109,3 +109,26 @@ class ZebraDevice(object):
     def restore_defaults(self, category):
         """Restore configuration defaults"""
         self.do('device.restore_defaults', category)
+
+    def list(self):
+        """List files"""
+        self.do('file.dir')
+        return self.read().decode().strip('"')
+
+    def delete(self, filename):
+        """Remove file"""
+        self.do('file.delete', filename)
+
+    def rename(self, oldname, newname):
+        """Rename file"""
+        self.do('file.rename', '%s %s' % (oldname, newname))
+
+    def download(self, filename):
+        """Download file"""
+        self.do('file.type', filename)
+        return self.read(printable=False)
+
+    def upload(self, filename, content):
+        """Upload file"""
+        self.write(b'! CISDFCRC16\r\n0000\r\n%s\r\n%08x\r\n0000\r\n%s' %
+                   (filename.encode(), len(content), content), printable=False)

@@ -3,6 +3,7 @@
 import argparse
 from collections import namedtuple
 import logging
+import os.path
 import re
 import colorlog
 from .device import ZebraDevice
@@ -64,6 +65,26 @@ class ZebraCommand(object):
         restore = cmds.add_parser('restore', parents=[common])
         restore.add_argument('category')
 
+        ls = cmds.add_parser('ls', parents=[common])
+
+        rm = cmds.add_parser('rm', parents=[common])
+        rm.add_argument('filename')
+
+        mv = cmds.add_parser('mv', parents=[common])
+        mv.add_argument('oldname')
+        mv.add_argument('newname')
+
+        cat = cmds.add_parser('cat', parents=[common])
+        cat.add_argument('filename')
+
+        pull = cmds.add_parser('pull', parents=[common])
+        pull.add_argument('filename')
+        pull.add_argument('--output', '-o')
+
+        push = cmds.add_parser('push', parents=[common])
+        push.add_argument('filename')
+        push.add_argument('--input', '-i')
+
         return parser
 
     @property
@@ -99,3 +120,33 @@ class ZebraCommand(object):
     def restore(self):
         """Restore configuration defaults"""
         self.device.restore_defaults(self.args.category)
+
+    def ls(self):
+        """List files"""
+        print(self.device.list())
+
+    def rm(self):
+        """Remove file"""
+        self.device.delete(self.args.filename)
+
+    def mv(self):
+        """Rename file"""
+        self.device.rename(self.args.oldname, self.args.newname)
+
+    def cat(self):
+        """Get file contents"""
+        print(self.device.download(self.args.filename).decode(), end='')
+
+    def pull(self):
+        """Download file"""
+        outfile = self.args.output or self.args.filename
+        name = os.path.basename(self.args.filename)
+        with open(outfile, 'wb') as f:
+            f.write(self.device.download(name))
+
+    def push(self):
+        """Upload file"""
+        infile = self.args.input or self.args.filename
+        name = os.path.basename(self.args.filename)
+        with open(infile, 'rb') as f:
+            self.device.upload(name, f.read())
