@@ -36,7 +36,7 @@ class ZebraCommand(object):
         handler.setFormatter(colorlog.ColoredFormatter(LOG_FMT,
                                                        log_colors=LOG_COLS))
         logging.basicConfig(level=self.loglevel, handlers=[handler])
-        self.device = ZebraDevice(self.args.device)
+        self.device = ZebraDevice(self.args.device, timeout=self.args.timeout)
 
     @classmethod
     def parser(cls, **kwargs):
@@ -47,6 +47,8 @@ class ZebraCommand(object):
         common.add_argument('--verbose', '-v', action='count', default=0)
         common.add_argument('--quiet', '-q', action='count', default=0)
         common.add_argument('--device', '-d', default=ZebraDevice.DEFAULT_PATH)
+        common.add_argument('--timeout', '-t', type=float,
+                            default=ZebraDevice.DEFAULT_TIMEOUT)
         cmds = parser.add_subparsers(title="subcommands", dest='subcommand')
         cmds.required = True
 

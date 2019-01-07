@@ -28,9 +28,10 @@ class ZebraDevice(object):
 
     config = ZebraConfigRoot()
 
-    def __init__(self, path=None):
+    def __init__(self, path=None, timeout=None):
         self.path = pathlib.Path(path if path is not None
                                  else self.DEFAULT_PATH)
+        self.timeout = timeout if timeout is not None else self.DEFAULT_TIMEOUT
         self.sel = selectors.DefaultSelector()
         self.fh = None
 
@@ -66,17 +67,15 @@ class ZebraDevice(object):
                      data.decode().strip() if printable else data.hex())
         self.fh.write(data)
 
-    def read(self, expect=None, timeout=None, printable=True):
+    def read(self, expect=None, printable=True):
         """Read data from device
 
         There is no consistent structure or delimiter for data read
         from the device.  The only viable approach is to read until an
         expected pattern match is seen, or a timeout occurs.
         """
-        if timeout is None:
-            timeout = self.DEFAULT_TIMEOUT
         data = b''
-        while self.sel.select(timeout):
+        while self.sel.select(self.timeout):
             data += self.fh.read(self.MAX_RESPONSE_LEN)
             if expect is not None and re.fullmatch(expect, data):
                 break
