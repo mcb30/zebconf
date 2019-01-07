@@ -42,7 +42,7 @@ class ZebraCommand(object):
     @classmethod
     def parser(cls, **kwargs):
         """Construct argument parser"""
-        # pylint: disable=unused-variable
+        # pylint: disable=too-many-locals, unused-variable
         parser = argparse.ArgumentParser(description=cls.__doc__, **kwargs)
         common = argparse.ArgumentParser(add_help=False)
         common.add_argument('--verbose', '-v', action='count', default=0)
@@ -84,6 +84,9 @@ class ZebraCommand(object):
         push = cmds.add_parser('push', parents=[common])
         push.add_argument('filename')
         push.add_argument('--input', '-i')
+
+        update = cmds.add_parser('update', parents=[common])
+        update.add_argument('firmware')
 
         return parser
 
@@ -150,3 +153,7 @@ class ZebraCommand(object):
         name = os.path.basename(self.args.filename)
         with open(infile, 'rb') as f:
             self.device.upload(name, f.read())
+
+    def update(self):
+        """Update firmware"""
+        self.device.update(self.args.firmware)
