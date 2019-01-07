@@ -59,12 +59,13 @@ class ZebraDevice(object):
         self.sel.unregister(self.fh)
         self.fh.close()
 
-    def write(self, data):
+    def write(self, data, printable=True):
         """Write data to device"""
-        logger.debug('tx: %s', data.strip())
-        self.fh.write(data.encode())
+        logger.debug('tx: %s',
+                     data.decode().strip() if printable else data.hex())
+        self.fh.write(data)
 
-    def read(self, expect=None, timeout=None):
+    def read(self, expect=None, timeout=None, printable=True):
         """Read data from device
 
         There is no consistent structure or delimiter for data read
@@ -80,21 +81,23 @@ class ZebraDevice(object):
                 break
         if not data:
             raise TimeoutError
-        logger.debug('rx: %s', data.decode())
-        return data.decode()
+        logger.debug('rx: %s', data.decode() if printable else data.hex())
+        return data
 
     def do(self, action, param=''):
         """Execute command"""
-        self.write('! U1 do "%s" "%s"\r\n' % (action, param))
+        self.write(b'! U1 do "%s" "%s"\r\n' %
+                   (action.encode(), param.encode()))
 
     def setvar(self, name, value):
         """Set variable value"""
-        self.write('! U1 setvar "%s" "%s"\r\n' % (name, value))
+        self.write(b'! U1 setvar "%s" "%s"\r\n' %
+                   (name.encode(), value.encode()))
 
     def getvar(self, name):
         """Get variable value"""
-        self.write('! U1 getvar "%s"\r\n' % name)
-        value = self.read(rb'".+?"')
+        self.write(b'! U1 getvar "%s"\r\n' % name.encode())
+        value = self.read(rb'".+?"').decode()
         if value == '"?"':
             raise UnknownVariableError(name)
         return value.strip('"')
