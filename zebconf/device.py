@@ -1,8 +1,11 @@
 """Zebra printer device"""
 
+import logging
 import pathlib
 import selectors
 from .config import ZebraConfigRoot
+
+logger = logging.getLogger(__name__)
 
 
 class ZebraDevice(object):
@@ -52,6 +55,7 @@ class ZebraDevice(object):
 
     def write(self, data):
         """Write data to device"""
+        logger.debug('tx: %s', data.strip())
         self.fh.write(data.encode())
 
     def read(self, timeout=None):
@@ -68,6 +72,7 @@ class ZebraDevice(object):
             data += self.fh.read(self.MAX_RESPONSE_LEN)
         if not data:
             raise TimeoutError
+        logger.debug('rx: %s', data.decode())
         return data.decode()
 
     def do(self, action, param=''):
