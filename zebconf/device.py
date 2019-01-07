@@ -2,10 +2,16 @@
 
 import logging
 import pathlib
+import re
 import selectors
 from .config import ZebraConfigRoot
 
 logger = logging.getLogger(__name__)
+
+
+class UnknownVariableError(LookupError):
+    """Unknown configuration variable"""
+    pass
 
 
 class ZebraDevice(object):
@@ -17,7 +23,7 @@ class ZebraDevice(object):
     MAX_RESPONSE_LEN = 16384
     """Maximum expected response length for any command"""
 
-    DEFAULT_TIMEOUT = 0.05
+    DEFAULT_TIMEOUT = 0.5
     """Timeout used when reading from device"""
 
     config = ZebraConfigRoot()
@@ -58,18 +64,20 @@ class ZebraDevice(object):
         logger.debug('tx: %s', data.strip())
         self.fh.write(data.encode())
 
-    def read(self, timeout=None):
+    def read(self, expect=None, timeout=None):
         """Read data from device
 
         There is no consistent structure or delimiter for data read
-        from the device.  The only viable approach is to read until a
-        timeout occurs.
+        from the device.  The only viable approach is to read until an
+        expected pattern match is seen, or a timeout occurs.
         """
         if timeout is None:
             timeout = self.DEFAULT_TIMEOUT
         data = b''
         while self.sel.select(timeout):
             data += self.fh.read(self.MAX_RESPONSE_LEN)
+            if expect is not None and re.fullmatch(expect, data):
+                break
         if not data:
             raise TimeoutError
         logger.debug('rx: %s', data.decode())
@@ -86,7 +94,10 @@ class ZebraDevice(object):
     def getvar(self, name):
         """Get variable value"""
         self.write('! U1 getvar "%s"\r\n' % name)
-        return self.read().strip('"')
+        value = self.read(rb'".+?"')
+        if value == '"?"':
+            raise UnknownVariableError(name)
+        return value.strip('"')
 
     def reset(self):
         """Reset device"""
