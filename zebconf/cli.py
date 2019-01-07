@@ -41,6 +41,7 @@ class ZebraCommand(object):
     @classmethod
     def parser(cls, **kwargs):
         """Construct argument parser"""
+        # pylint: disable=unused-variable
         parser = argparse.ArgumentParser(description=cls.__doc__, **kwargs)
         common = argparse.ArgumentParser(add_help=False)
         common.add_argument('--verbose', '-v', action='count', default=0)
@@ -51,19 +52,15 @@ class ZebraCommand(object):
 
         getvar = cmds.add_parser('get', parents=[common])
         getvar.add_argument('variables', metavar='name', nargs='+')
-        getvar.set_defaults(func=cls.getvar)
 
         setvar = cmds.add_parser('set', parents=[common])
         setvar.add_argument('variables', metavar='name=value', nargs='+',
                             type=NameValuePair.parse)
-        setvar.set_defaults(func=cls.setvar)
 
         reset = cmds.add_parser('reset', parents=[common])
-        reset.set_defaults(func=cls.reset)
 
         restore = cmds.add_parser('restore', parents=[common])
         restore.add_argument('category')
-        restore.set_defaults(func=cls.restore)
 
         return parser
 
@@ -81,14 +78,14 @@ class ZebraCommand(object):
     def execute(self):
         """Execute command"""
         with self.device:
-            self.args.func(self)
+            getattr(self, self.args.subcommand)()
 
-    def getvar(self):
+    def get(self):
         """Get variable(s)"""
         for name in self.args.variables:
             print(self.device.getvar(name))
 
-    def setvar(self):
+    def set(self):
         """Set variable(s)"""
         for name, value in self.args.variables:
             self.device.setvar(name, value)
