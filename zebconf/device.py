@@ -6,7 +6,6 @@ import pathlib
 import re
 import selectors
 from passlib.utils import pbkdf2
-from .config import ZebraConfigRoot
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +26,6 @@ class ZebraDevice(object):
 
     DEFAULT_TIMEOUT = 2.0
     """Timeout used when reading from device"""
-
-    config = ZebraConfigRoot()
 
     def __init__(self, path=None, timeout=None):
         self.path = pathlib.Path(path if path is not None
