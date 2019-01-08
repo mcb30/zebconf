@@ -5,6 +5,8 @@ import logging
 import pathlib
 import re
 import selectors
+import socket
+from urllib.parse import urlparse
 from passlib.utils import pbkdf2
 
 logger = logging.getLogger(__name__)
@@ -13,6 +15,29 @@ logger = logging.getLogger(__name__)
 class UnknownVariableError(LookupError):
     """Unknown configuration variable"""
     pass
+
+
+class ZebraNetworkPath(object):
+    """A Zebra printer network path"""
+    # pylint: disable=too-few-public-methods
+
+    DEFAULT_PORT = 9100
+    """Default port number for Zebra device"""
+
+    def __init__(self, path):
+        self.path = path
+        self.url = urlparse('//%s' % path)
+
+    def __str__(self):
+        return self.path
+
+    def open(self, _mode, **kwargs):
+        """Open network path"""
+        address = (self.url.hostname, self.url.port or self.DEFAULT_PORT)
+        sock = socket.create_connection(address)
+        fh = sock.makefile('rwb', **kwargs)
+        sock.close()
+        return fh
 
 
 class ZebraDevice(object):
@@ -28,8 +53,12 @@ class ZebraDevice(object):
     """Timeout used when reading from device"""
 
     def __init__(self, path=None, timeout=None):
-        self.path = pathlib.Path(path if path is not None
-                                 else self.DEFAULT_PATH)
+        if path is None:
+            self.path = pathlib.Path(self.DEFAULT_PATH)
+        elif '/' in path:
+            self.path = pathlib.Path(path)
+        else:
+            self.path = ZebraNetworkPath(path)
         self.timeout = timeout if timeout is not None else self.DEFAULT_TIMEOUT
         self.sel = selectors.DefaultSelector()
         self.fh = None
