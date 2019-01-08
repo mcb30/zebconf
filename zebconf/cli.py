@@ -7,6 +7,7 @@ import os.path
 import re
 import colorlog
 from .device import ZebraDevice
+from .firmware import ZebraFirmware
 
 LOG_FMT = '%(log_color)s%(levelname)s:%(name)s:%(message)s'
 LOG_COLS = {**colorlog.default_log_colors, 'DEBUG': 'cyan'}
@@ -87,6 +88,7 @@ class ZebraCommand(object):
 
         update = cmds.add_parser('update', parents=[common])
         update.add_argument('firmware')
+        update.add_argument('--check', action='store_true')
 
         return parser
 
@@ -156,4 +158,6 @@ class ZebraCommand(object):
 
     def update(self):
         """Update firmware"""
-        self.device.update(self.args.firmware)
+        firmware = ZebraFirmware(self.args.firmware)
+        if not self.args.check:
+            self.device.update(firmware)

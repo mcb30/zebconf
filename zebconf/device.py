@@ -1,11 +1,9 @@
 """Zebra printer device"""
 
 import logging
-import os.path
 import pathlib
 import re
 import selectors
-import zipfile
 from .config import ZebraConfigRoot
 
 logger = logging.getLogger(__name__)
@@ -137,14 +135,4 @@ class ZebraDevice(object):
 
     def update(self, firmware):
         """Update firmware"""
-        with zipfile.ZipFile(firmware) as archive:
-            zpls = [x for x in archive.namelist()
-                    if os.path.splitext(x)[1].lower() == '.zpl']
-            if not zpls:
-                raise ValueError('No .zpl files in firmware')
-            for zpl in zpls:
-                logger.info('found %s', zpl)
-            if len(zpls) > 1:
-                raise ValueError('Multiple .zpl files in firmware')
-            with archive.open(zpls[0]) as f:
-                self.write(f.read())
+        self.write(bytes(firmware))
