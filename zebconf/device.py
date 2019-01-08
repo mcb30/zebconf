@@ -133,6 +133,6 @@ class ZebraDevice(object):
         self.write(b'! CISDFCRC16\r\n0000\r\n%s\r\n%08x\r\n0000\r\n%s' %
                    (filename.encode(), len(content), content), printable=False)
 
-    def update(self, firmware):
-        """Update firmware"""
+    def upgrade(self, firmware):
+        """Upgrade firmware"""
         self.write(bytes(firmware))

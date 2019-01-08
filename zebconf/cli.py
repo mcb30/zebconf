@@ -86,9 +86,9 @@ class ZebraCommand(object):
         push.add_argument('filename')
         push.add_argument('--input', '-i')
 
-        update = cmds.add_parser('update', parents=[common])
-        update.add_argument('firmware')
-        update.add_argument('--check', action='store_true')
+        upgrade = cmds.add_parser('upgrade', parents=[common])
+        upgrade.add_argument('firmware')
+        upgrade.add_argument('--check', action='store_true')
 
         return parser
 
@@ -156,8 +156,8 @@ class ZebraCommand(object):
         with open(infile, 'rb') as f:
             self.device.upload(name, f.read())
 
-    def update(self):
-        """Update firmware"""
+    def upgrade(self):
+        """Upgrade firmware"""
         firmware = ZebraFirmware(self.args.firmware)
         if not self.args.check:
-            self.device.update(firmware)
+            self.device.upgrade(firmware)
