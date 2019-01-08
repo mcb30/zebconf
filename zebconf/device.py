@@ -1,9 +1,11 @@
 """Zebra printer device"""
 
+import binascii
 import logging
 import pathlib
 import re
 import selectors
+from passlib.utils import pbkdf2
 from .config import ZebraConfigRoot
 
 logger = logging.getLogger(__name__)
@@ -157,3 +159,17 @@ class ZebraDevice(object):
     def upgrade(self, firmware):
         """Upgrade firmware"""
         self.write(bytes(firmware))
+
+    def wifi(self, essid, password, auth='wpa_psk'):
+        """Configure WiFi ESSID and password"""
+        self.restore_defaults('wlan')
+        self.setvar('wlan.essid', essid)
+        getattr(self, 'wifi_%s' % auth)(essid, password)
+
+    def wifi_wpa_psk(self, essid, password):
+        """Configure WiFi ESSID and WPA-PSK password"""
+        raw = pbkdf2.pbkdf2(password.encode(), essid.encode(), 4096, 32)
+        psk = binascii.b2a_hex(raw).decode().upper()
+        self.setbool('wlan.wpa.enable', True)
+        self.setvar('wlan.wpa.authentication', 'psk')
+        self.setvar('wlan.wpa.psk', psk)

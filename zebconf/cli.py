@@ -90,6 +90,15 @@ class ZebraCommand(object):
         upgrade.add_argument('firmware')
         upgrade.add_argument('--check', action='store_true')
 
+        wifi = cmds.add_parser('wifi', parents=[common])
+        wifi.add_argument('essid')
+        wifi.add_argument('--password', '-p')
+        auth = wifi.add_mutually_exclusive_group()
+        auth.add_argument('--wpa-psk', dest='auth', action='store_const',
+                          const='wpa_psk', default='wpa_psk')
+        wifi.add_argument('--no-reset', dest='reset', action='store_false',
+                          default=True)
+
         return parser
 
     @property
@@ -161,3 +170,9 @@ class ZebraCommand(object):
         firmware = ZebraFirmware(self.args.firmware)
         if not self.args.check:
             self.device.upgrade(firmware)
+
+    def wifi(self):
+        """Configure WiFi"""
+        self.device.wifi(self.args.essid, self.args.password, self.args.auth)
+        if self.args.reset:
+            self.device.reset()
