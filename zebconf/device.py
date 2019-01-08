@@ -94,6 +94,14 @@ class ZebraDevice(object):
         self.write(b'! U1 setvar "%s" "%s"\r\n' %
                    (name.encode(), value.encode()))
 
+    def setint(self, name, value):
+        """Set integer variable value"""
+        self.setvar(name, str(value))
+
+    def setbool(self, name, value):
+        """Set boolean variable value"""
+        self.setvar(name, 'on' if value else 'off')
+
     def getvar(self, name):
         """Get variable value"""
         self.write(b'! U1 getvar "%s"\r\n' % name.encode())
@@ -101,6 +109,19 @@ class ZebraDevice(object):
         if value == '"?"':
             raise UnknownVariableError(name)
         return value.strip('"')
+
+    def getint(self, name):
+        """Get integer variable value"""
+        return int(self.getvar(name))
+
+    def getbool(self, name):
+        """Get boolean variable value"""
+        value = self.getvar(name)
+        if value == 'on':
+            return True
+        elif value == 'off':
+            return False
+        raise ValueError("%s: invalid value '%s'" % (name, value))
 
     def reset(self):
         """Reset device"""
