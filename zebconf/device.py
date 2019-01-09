@@ -104,12 +104,13 @@ class ZebraDevice(object):
         """
         data = b''
         while self.sel.select(self.timeout):
-            data += self.fh.read(self.MAX_RESPONSE_LEN)
+            frag = self.fh.read(self.MAX_RESPONSE_LEN)
+            logger.debug('rx: %s', frag.decode() if printable else frag.hex())
+            data += frag
             if expect is not None and re.fullmatch(expect, data):
                 break
         if not data:
             raise TimeoutError
-        logger.debug('rx: %s', data.decode() if printable else data.hex())
         return data
 
     def do(self, action, param=''):
