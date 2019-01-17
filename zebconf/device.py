@@ -2,12 +2,9 @@
 
 import binascii
 import logging
-import pathlib
 import re
-import selectors
-import socket
-from urllib.parse import urlparse
 from passlib.utils import pbkdf2
+from .connection import ZebraFileConnection, ZebraNetworkConnection
 
 logger = logging.getLogger(__name__)
 
@@ -15,29 +12,6 @@ logger = logging.getLogger(__name__)
 class UnknownVariableError(LookupError):
     """Unknown configuration variable"""
     pass
-
-
-class ZebraNetworkPath(object):
-    """A Zebra printer network path"""
-    # pylint: disable=too-few-public-methods
-
-    DEFAULT_PORT = 9100
-    """Default port number for Zebra device"""
-
-    def __init__(self, path):
-        self.path = path
-        self.url = urlparse('//%s' % path)
-
-    def __str__(self):
-        return self.path
-
-    def open(self, _mode, **kwargs):
-        """Open network path"""
-        address = (self.url.hostname, self.url.port or self.DEFAULT_PORT)
-        sock = socket.create_connection(address)
-        fh = sock.makefile('rwb', **kwargs)
-        sock.close()
-        return fh
 
 
 class ZebraDevice(object):
@@ -54,17 +28,15 @@ class ZebraDevice(object):
 
     def __init__(self, path=None, timeout=None):
         if path is None:
-            self.path = pathlib.Path(self.DEFAULT_PATH)
+            self.conn = ZebraFileConnection(self.DEFAULT_PATH)
         elif '/' in path:
-            self.path = pathlib.Path(path)
+            self.conn = ZebraFileConnection(path)
         else:
-            self.path = ZebraNetworkPath(path)
+            self.conn = ZebraNetworkConnection(path)
         self.timeout = timeout if timeout is not None else self.DEFAULT_TIMEOUT
-        self.sel = selectors.DefaultSelector()
-        self.fh = None
 
     def __repr__(self):
-        return '%s(%r)' % (self.__class__.__name__, str(self.path))
+        return '%s(%r)' % (self.__class__.__name__, self.conn.path)
 
     def __enter__(self):
         self.open()
@@ -81,19 +53,18 @@ class ZebraDevice(object):
 
     def open(self):
         """Open device"""
-        self.fh = self.path.open('r+b', buffering=0)
-        self.sel.register(self.fh, selectors.EVENT_READ)
+        self.conn.open()
 
     def close(self):
         """Close device"""
-        self.sel.unregister(self.fh)
-        self.fh.close()
+        self.conn.close()
 
     def write(self, data, printable=True):
         """Write data to device"""
         logger.debug('tx: %s',
                      data.decode().strip() if printable else data.hex())
-        self.fh.write(data)
+        count = self.conn.write(data)
+        assert count == len(data)
 
     def read(self, expect=None, printable=True):
         """Read data from device
@@ -103,8 +74,10 @@ class ZebraDevice(object):
         expected pattern match is seen, or a timeout occurs.
         """
         data = b''
-        while self.sel.select(self.timeout):
-            frag = self.fh.read(self.MAX_RESPONSE_LEN)
+        while True:
+            frag = self.conn.read(self.MAX_RESPONSE_LEN, self.timeout)
+            if not frag:
+                break
             logger.debug('rx: %s', frag.decode() if printable else frag.hex())
             data += frag
             if expect is not None and re.fullmatch(expect, data):
