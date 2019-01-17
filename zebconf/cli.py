@@ -95,7 +95,8 @@ class ZebraCommand(object):
         wifi.add_argument('--password', '-p')
         auth = wifi.add_mutually_exclusive_group()
         auth.add_argument('--wpa-psk', dest='auth', action='store_const',
-                          const='wpa_psk', default='wpa_psk')
+                          const='wpa_psk')
+        wifi.add_argument('--country')
         wifi.add_argument('--no-reset', dest='reset', action='store_false',
                           default=True)
 
@@ -173,6 +174,9 @@ class ZebraCommand(object):
 
     def wifi(self):
         """Configure WiFi"""
-        self.device.wifi(self.args.essid, self.args.password, self.args.auth)
+        kwargs = {x: getattr(self.args, x)
+                  for x in ('auth', 'country')
+                  if getattr(self.args, x) is not None}
+        self.device.wifi(self.args.essid, self.args.password, **kwargs)
         if self.args.reset:
             self.device.reset()

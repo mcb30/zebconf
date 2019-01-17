@@ -187,10 +187,12 @@ class ZebraDevice(object):
         """Upgrade firmware"""
         self.write(bytes(firmware))
 
-    def wifi(self, essid, password, auth='wpa_psk'):
+    def wifi(self, essid, password, auth='wpa_psk', country=None):
         """Configure WiFi ESSID and password"""
         self.restore_defaults('wlan')
         self.setvar('wlan.essid', essid)
+        if country is not None:
+            self.setvar('wlan.country_code', country)
         getattr(self, 'wifi_%s' % auth)(essid, password)
 
     def wifi_wpa_psk(self, essid, password):
