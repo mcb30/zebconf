@@ -23,6 +23,7 @@ setup(
     install_requires=[
         'colorlog',
         'passlib',
+        'pyusb',
     ],
     entry_points={
         'console_scripts': [
