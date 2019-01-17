@@ -1,7 +1,7 @@
 """Zebra printer device connection"""
 
 from abc import ABC, abstractmethod
-import os
+import errno
 import selectors
 import socket
 from urllib.parse import urlparse
@@ -139,7 +139,7 @@ class ZebraUsbConnection(ZebraConnection):
         try:
             raw = self.ep_in.read(size, timeout_ms)
         except usb.USBError as e:
-            if e.errno == os.errno.ETIMEDOUT:
+            if e.errno == errno.ETIMEDOUT:
                 return b''
             raise
         return bytes(raw)
