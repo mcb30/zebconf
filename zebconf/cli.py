@@ -48,7 +48,7 @@ class ZebraCommand(object):
         common = argparse.ArgumentParser(add_help=False)
         common.add_argument('--verbose', '-v', action='count', default=0)
         common.add_argument('--quiet', '-q', action='count', default=0)
-        common.add_argument('--device', '-d', default=ZebraDevice.DEFAULT_PATH)
+        common.add_argument('--device', '-d')
         common.add_argument('--timeout', '-t', type=float,
                             default=ZebraDevice.DEFAULT_TIMEOUT)
         cmds = parser.add_subparsers(title="subcommands", dest='subcommand')

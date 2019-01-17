@@ -4,7 +4,8 @@ import binascii
 import logging
 import re
 from passlib.utils import pbkdf2
-from .connection import ZebraFileConnection, ZebraNetworkConnection
+from .connection import (ZebraFileConnection, ZebraNetworkConnection,
+                         ZebraUsbConnection)
 
 logger = logging.getLogger(__name__)
 
@@ -17,9 +18,6 @@ class UnknownVariableError(LookupError):
 class ZebraDevice(object):
     """A Zebra printer device"""
 
-    DEFAULT_PATH = '/dev/usb/lp0'
-    """Default path to Zebra device"""
-
     MAX_RESPONSE_LEN = 16384
     """Maximum expected response length for any command"""
 
@@ -28,7 +26,7 @@ class ZebraDevice(object):
 
     def __init__(self, path=None, timeout=None):
         if path is None:
-            self.conn = ZebraFileConnection(self.DEFAULT_PATH)
+            self.conn = ZebraUsbConnection()
         elif '/' in path:
             self.conn = ZebraFileConnection(path)
         else:
