@@ -118,7 +118,7 @@ class ZebraUsbConnection(ZebraConnection):
                            if ep_dir(x) == usb.ENDPOINT_OUT)
         try:
             self.dev.detach_kernel_driver(self.intf.bInterfaceNumber)
-        except usb.USBError:
+        except (NotImplementedError, usb.USBError):
             pass
         usb.util.claim_interface(self.dev, self.intf)
         self.dev.reset()
@@ -127,7 +127,7 @@ class ZebraUsbConnection(ZebraConnection):
         usb.util.release_interface(self.dev, self.intf)
         try:
             self.dev.attach_kernel_driver(self.intf.bInterfaceNumber)
-        except usb.USBError:
+        except (NotImplementedError, usb.USBError):
             pass
         usb.util.dispose_resources(self.dev)
 
