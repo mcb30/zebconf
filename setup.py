@@ -7,6 +7,8 @@ from setuptools import setup, find_packages
 setup(
     name="zebconf",
     description="Zebra printer configuration",
+    long_description=open('README.md').read(),
+    long_description_content_type='text/markdown',
     author="Michael Brown",
     author_email="mbrown@fensystems.co.uk",
     url="https://github.com/unipartdigital/zebconf",
