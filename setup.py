@@ -9,6 +9,7 @@ setup(
     description="Zebra printer configuration",
     author="Michael Brown",
     author_email="mbrown@fensystems.co.uk",
+    url="https://github.com/unipartdigital/zebconf",
     license="GPLv2+",
     classifiers=[
         "Development Status :: 3 - Alpha",
