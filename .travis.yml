@@ -6,3 +6,11 @@ python:
 install:
   - pip install -e .
 script: python -m unittest
+deploy:
+  provider: pypi
+  distributions: "sdist bdist_wheel"
+  skip_existing: true
+  user: $PYPI_USER
+  password: $PYPI_PASSWORD
+  on:
+    tags: true
