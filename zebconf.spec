@@ -1,7 +1,7 @@
 %global srcname zebconf
 
 Name:		python-%{srcname}
-Version:	0.1.3
+Version:	0.1.4
 Release:	1%{?dist}
 Summary:	Zebra printer configuration
 License:	GPLv2+
@@ -43,6 +43,10 @@ Zebra printer configuration library and command-line tool.
 %{python3_sitelib}/%{srcname}-%{version}-*.egg-info/
 
 %changelog
+* Mon Jan 21 2019 Michael Brown <mbrown@fensystems.co.uk> 0.1.4-1
+- rpm: Omit author from RPM changelog messages
+- rpm: Fix source tarball name to match tito's expectations
+
 * Mon Jan 21 2019 Michael Brown <mbrown@fensystems.co.uk> 0.1.3-1
 - Create new release tag using tito
 
