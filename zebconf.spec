@@ -6,7 +6,7 @@ Release:	1%{?dist}
 Summary:	Zebra printer configuration
 License:	GPLv2+
 URL:		https://github.com/unipartdigital/zebconf
-Source0:	%{srcname}-%{version}.tar.gz
+Source0:	%{name}-%{version}.tar.gz
 BuildArch:	noarch
 BuildRequires:	python3-devel
 BuildRequires:	python3dist(setuptools)
@@ -27,7 +27,7 @@ Requires:	python3dist(setuptools)
 Zebra printer configuration library and command-line tool.
 
 %prep
-%autosetup -n %{srcname}-%{version}
+%autosetup
 
 %build
 %py3_build
