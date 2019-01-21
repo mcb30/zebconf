@@ -3,3 +3,4 @@ builder = tito.builder.Builder
 tagger = tito.tagger.VersionTagger
 tag_commit_message_format = build: Release version %(version)s
 tag_format = v{version}-{release}
+changelog_format = %s
