@@ -1,14 +1,19 @@
 """Zebra printer device connection"""
 
-from abc import ABC, abstractmethod
+from __future__ import absolute_import
+from future.utils import with_metaclass
+from future.standard_library import install_aliases
+install_aliases()
+
+from abc import ABCMeta, abstractmethod
 import errno
-import selectors
+import select
 import socket
 from urllib.parse import urlparse
 import usb
 
 
-class ZebraConnection(ABC):
+class ZebraConnection(with_metaclass(ABCMeta)):
     """A Zebra device connection"""
 
     def __init__(self, path=None):
@@ -38,55 +43,57 @@ class ZebraConnection(ABC):
         pass
 
 
-class ZebraFileHandleConnection(ZebraConnection):
-    """A Zebra file-handle device connection"""
+class ZebraFileConnection(ZebraConnection):
+    """A Zebra file device connection"""
     # pylint: disable=abstract-method
 
     def __init__(self, path=None):
-        super().__init__(path)
+        super(ZebraFileConnection, self).__init__(path)
         self.fh = None
-        self.sel = selectors.DefaultSelector()
 
-    def register(self, fh):
-        """Register file handle"""
-        self.fh = fh
-        self.sel.register(self.fh, selectors.EVENT_READ)
+    def open(self):
+        self.fh = open(self.path, 'r+b', buffering=0)
 
     def close(self):
-        self.sel.unregister(self.fh)
         self.fh.close()
         self.fh = None
 
     def write(self, data):
-        return self.fh.write(data)
+        self.fh.write(data)
 
     def read(self, size, timeout=None):
-        if not self.sel.select(timeout):
+        if not select.select([self.fh], [], [], timeout)[0]:
             return None
         return self.fh.read(size)
 
 
-class ZebraFileConnection(ZebraFileHandleConnection):
-    """A Zebra file device connection"""
-
-    def open(self):
-        super().open()
-        self.register(open(self.path, 'r+b', buffering=0))
-
-
-class ZebraNetworkConnection(ZebraFileHandleConnection):
+class ZebraNetworkConnection(ZebraConnection):
     """A Zebra network device connection"""
 
     DEFAULT_PORT = 9100
     """Default port number for Zebra device"""
 
+    def __init__(self, path=None):
+        super(ZebraNetworkConnection, self).__init__(path)
+        self.sock = None
+
     def open(self):
-        super().open()
+        super(ZebraNetworkConnection, self).open()
         url = urlparse('//%s' % self.path)
         address = (url.hostname, url.port or self.DEFAULT_PORT)
-        sock = socket.create_connection(address)
-        self.register(sock.makefile('rwb', buffering=0))
-        sock.close()
+        self.sock = socket.create_connection(address)
+
+    def close(self):
+        self.sock.close()
+        self.sock = None
+
+    def write(self, data):
+        self.sock.sendall(data)
+
+    def read(self, size, timeout=None):
+        if not select.select([self.sock.fileno()], [], [], timeout)[0]:
+            return None
+        return self.sock.recv(size)
 
 
 class ZebraUsbConnection(ZebraConnection):
@@ -96,7 +103,7 @@ class ZebraUsbConnection(ZebraConnection):
     """Default vendor ID for Zebra device"""
 
     def __init__(self, path=None):
-        super().__init__(path)
+        super(ZebraUsbConnection, self).__init__(path)
         self.dev = None
         self.intf = None
         self.ep_in = None
@@ -109,7 +116,7 @@ class ZebraUsbConnection(ZebraConnection):
         self.dev = usb.core.find(idVendor=self.DEFAULT_VENDOR,
                                  custom_match=lambda dev: any(intfs(dev)))
         if self.dev is None:
-            raise FileNotFoundError("No Zebra printers found")
+            raise OSError(errno.ENOENT, "No Zebra printers found")
         self.intf = next(intfs(self.dev))
         ep_dir = lambda ep: usb.util.endpoint_direction(ep.bEndpointAddress)
         self.ep_in = next(x for x in self.intf
@@ -142,4 +149,4 @@ class ZebraUsbConnection(ZebraConnection):
             if e.errno == errno.ETIMEDOUT:
                 return b''
             raise
-        return bytes(raw)
+        return raw.tostring()

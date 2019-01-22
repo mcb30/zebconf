@@ -17,6 +17,7 @@ Zebra printer configuration library and command-line tool.
 %package -n	python3-%{srcname}
 Summary:	%{summary}
 Requires:	python3dist(colorlog)
+Requires:	python3dist(future)
 Requires:	python3dist(passlib)
 Requires:	python3dist(pyusb)
 Requires:	python3dist(setuptools)

@@ -60,9 +60,9 @@ class ZebraDevice(object):
     def write(self, data, printable=True):
         """Write data to device"""
         logger.debug('tx: %s',
-                     data.decode().strip() if printable else data.hex())
-        count = self.conn.write(data)
-        assert count == len(data)
+                     data.decode().strip() if printable else
+                     ''.join('%02x' % x for x in bytearray(data)))
+        self.conn.write(data)
 
     def read(self, expect=None, printable=True):
         """Read data from device
@@ -76,9 +76,11 @@ class ZebraDevice(object):
             frag = self.conn.read(self.MAX_RESPONSE_LEN, self.timeout)
             if not frag:
                 break
-            logger.debug('rx: %s', frag.decode() if printable else frag.hex())
+            logger.debug('rx: %s',
+                         frag.decode() if printable else
+                         ''.join('%02x' % x for x in bytearray(frag)))
             data += frag
-            if expect is not None and re.fullmatch(expect, data):
+            if expect is not None and re.match(expect, data):
                 break
         if not data:
             raise TimeoutError
@@ -105,7 +107,7 @@ class ZebraDevice(object):
     def getvar(self, name):
         """Get variable value"""
         self.write(b'! U1 getvar "%s"\r\n' % name.encode())
-        value = self.read(rb'".+?"').decode()
+        value = self.read(br'".+?"$').decode()
         if value == '"?"':
             raise UnknownVariableError(name)
         return value.strip('"')

@@ -1,5 +1,7 @@
 """Zebra configuration command line interface"""
 
+from __future__ import absolute_import, print_function
+
 import argparse
 from collections import namedtuple
 import logging
@@ -10,7 +12,8 @@ from .device import ZebraDevice
 from .firmware import ZebraFirmware
 
 LOG_FMT = '%(log_color)s%(levelname)s:%(name)s:%(message)s'
-LOG_COLS = {**colorlog.default_log_colors, 'DEBUG': 'cyan'}
+LOG_COLS = colorlog.default_log_colors.copy()
+LOG_COLS.update({'DEBUG': 'cyan'})
 
 
 class NameValuePair(namedtuple('NameValuePair', ('name', 'value'))):
