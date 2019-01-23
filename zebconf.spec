@@ -1,7 +1,7 @@
 %global srcname zebconf
 
 Name:		python-%{srcname}
-Version:	0.1.4
+Version:	0.1.5
 Release:	1%{?dist}
 Summary:	Zebra printer configuration
 License:	GPLv2+
@@ -44,6 +44,9 @@ Zebra printer configuration library and command-line tool.
 %{python3_sitelib}/%{srcname}-%{version}-*.egg-info/
 
 %changelog
+* Wed Jan 23 2019 Michael Brown <mbrown@fensystems.co.uk> 0.1.5-1
+- zebconf: Support Python 2 alongside Python 3
+
 * Mon Jan 21 2019 Michael Brown <mbrown@fensystems.co.uk> 0.1.4-1
 - rpm: Omit author from RPM changelog messages
 - rpm: Fix source tarball name to match tito's expectations
