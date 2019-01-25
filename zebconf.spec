@@ -14,6 +14,19 @@ BuildRequires:	python3dist(setuptools)
 %description
 Zebra printer configuration library and command-line tool.
 
+%package -n	python2-%{srcname}
+Summary:	%{summary}
+Requires:	python2dist(future)
+Requires:	python2dist(passlib)
+Requires:	python2dist(pyusb)
+Requires:	python2dist(setuptools)
+Recommends:	python2dist(colorlog)
+
+%{?python_provide:%python_provide python2-%{srcname}}
+
+%description -n python2-%{srcname}
+Zebra printer configuration library and command-line tool.
+
 %package -n	python3-%{srcname}
 Summary:	%{summary}
 Requires:	python3dist(future)
@@ -31,10 +44,18 @@ Zebra printer configuration library and command-line tool.
 %autosetup
 
 %build
+%py2_build
 %py3_build
 
 %install
+%py2_install
 %py3_install
+
+%files -n python2-%{srcname}
+%doc README.md
+%license COPYING
+%{python2_sitelib}/%{srcname}/
+%{python2_sitelib}/%{srcname}-%{version}-*.egg-info/
 
 %files -n python3-%{srcname}
 %doc README.md
