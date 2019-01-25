@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import binascii
+import errno
 import logging
 import re
 from passlib.utils import pbkdf2
@@ -85,7 +86,7 @@ class ZebraDevice(object):
             if expect is not None and re.match(expect, data):
                 break
         if not data:
-            raise TimeoutError
+            raise OSError(errno.ETIMEDOUT, "Timed out waiting for response")
         return data
 
     def do(self, action, param=''):
