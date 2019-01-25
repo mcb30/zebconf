@@ -25,7 +25,6 @@ setup(
     ],
     packages=find_packages(),
     install_requires=[
-        'colorlog',
         'future',
         'passlib',
         'pyusb',

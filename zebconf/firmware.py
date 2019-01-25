@@ -1,5 +1,7 @@
 """Zebra printer firmware"""
 
+from __future__ import absolute_import
+
 import logging
 import os.path
 import zipfile

@@ -1,5 +1,7 @@
 """Zebra printer device"""
 
+from __future__ import absolute_import
+
 import binascii
 import logging
 import re

@@ -7,13 +7,9 @@ from collections import namedtuple
 import logging
 import os.path
 import re
-import colorlog
 from .device import ZebraDevice
 from .firmware import ZebraFirmware
-
-LOG_FMT = '%(log_color)s%(levelname)s:%(name)s:%(message)s'
-LOG_COLS = colorlog.default_log_colors.copy()
-LOG_COLS.update({'DEBUG': 'cyan'})
+from .logging import ZebraFormatter
 
 
 class NameValuePair(namedtuple('NameValuePair', ('name', 'value'))):
@@ -37,9 +33,9 @@ class ZebraCommand(object):
         self.args = self.parser().parse_args(argv)
         self.verbosity = (self.loglevels.index(logging.INFO) +
                           self.args.verbose - self.args.quiet)
-        handler = colorlog.StreamHandler()
-        handler.setFormatter(colorlog.ColoredFormatter(LOG_FMT,
-                                                       log_colors=LOG_COLS))
+        handler = logging.StreamHandler()
+        formatter = ZebraFormatter('%(levelname)s:%(name)s:%(message)s')
+        handler.setFormatter(formatter)
         logging.basicConfig(level=self.loglevel, handlers=[handler])
         self.device = ZebraDevice(self.args.device, timeout=self.args.timeout)
 
