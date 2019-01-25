@@ -43,6 +43,9 @@ Requires:	python2-setuptools
 %if 0%{?with_recommends}
 Recommends:	python2-colorlog
 %endif
+%if ! 0%{?with_py3}
+Provides:	%{srcname} = %{version}-%{release}
+%endif
 
 %{?python_provide:%python_provide python2-%{srcname}}
 
@@ -58,6 +61,7 @@ Requires:	python3-passlib
 Requires:	python3-pyusb
 Requires:	python3-setuptools
 Recommends:	python3-colorlog
+Provides:	%{srcname} = %{version}-%{release}
 
 %{?python_provide:%python_provide python3-%{srcname}}
 
