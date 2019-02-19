@@ -10,7 +10,7 @@
 %endif
 
 Name:		python-%{srcname}
-Version:	0.1.6
+Version:	0.1.7
 Release:	1%{?dist}
 Summary:	Zebra printer configuration
 License:	GPLv2+
@@ -109,6 +109,9 @@ Zebra printer configuration library and command-line tool.
 %endif
 
 %changelog
+* Tue Feb 19 2019 Michael Brown <mbrown@fensystems.co.uk> 0.1.7-1
+- zebconf: Apply timeout when opening network connections
+
 * Fri Jan 25 2019 Michael Brown <mbrown@fensystems.co.uk> 0.1.6-1
 - rpm: Support building for EPEL as well as Fedora
 - rpm: Build both Python 2 and Python 3 RPMs
