@@ -54,7 +54,7 @@ class ZebraDevice(object):
 
     def open(self):
         """Open device"""
-        self.conn.open()
+        self.conn.open(self.timeout)
 
     def close(self):
         """Close device"""

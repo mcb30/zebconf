@@ -23,7 +23,7 @@ class ZebraConnection(with_metaclass(ABCMeta)):
         return '%s(%r)' % (self.__class__.__name__, self.path)
 
     @abstractmethod
-    def open(self):
+    def open(self, timeout=None):
         """Open connection"""
         pass
 
@@ -51,7 +51,7 @@ class ZebraFileConnection(ZebraConnection):
         super(ZebraFileConnection, self).__init__(path)
         self.fh = None
 
-    def open(self):
+    def open(self, timeout=None):
         self.fh = open(self.path, 'r+b', buffering=0)
 
     def close(self):
@@ -77,11 +77,11 @@ class ZebraNetworkConnection(ZebraConnection):
         super(ZebraNetworkConnection, self).__init__(path)
         self.sock = None
 
-    def open(self):
+    def open(self, timeout=None):
         super(ZebraNetworkConnection, self).open()
         url = urlparse('//%s' % self.path)
         address = (url.hostname, url.port or self.DEFAULT_PORT)
-        self.sock = socket.create_connection(address)
+        self.sock = socket.create_connection(address, timeout)
 
     def close(self):
         self.sock.close()
@@ -109,7 +109,7 @@ class ZebraUsbConnection(ZebraConnection):
         self.ep_in = None
         self.ep_out = None
 
-    def open(self):
+    def open(self, timeout=None):
         intfs = lambda dev: (usb.util.find_descriptor(
             cfg, bInterfaceClass=usb.CLASS_PRINTER
         ) for cfg in dev)
