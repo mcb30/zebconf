@@ -18,7 +18,7 @@ class NameValuePair(namedtuple('NameValuePair', ('name', 'value'))):
     @classmethod
     def parse(cls, text):
         """Parse name=value pair from a string"""
-        m = re.fullmatch(r'([\w\.]+)=(.+)', text)
+        m = re.match(r'([\w\.]+)=(.+)$', text)
         if not m:
             raise ValueError(text)
         return cls(*m.groups())
