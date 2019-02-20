@@ -10,7 +10,7 @@
 %endif
 
 Name:		python-%{srcname}
-Version:	0.1.7
+Version:	0.1.8
 Release:	1%{?dist}
 Summary:	Zebra printer configuration
 License:	GPLv2+
@@ -109,6 +109,9 @@ Zebra printer configuration library and command-line tool.
 %endif
 
 %changelog
+* Wed Feb 20 2019 Michael Brown <mbrown@fensystems.co.uk> 0.1.8-1
+- zebconf: Fix use of "zebconf set" for Python 2.7
+
 * Tue Feb 19 2019 Michael Brown <mbrown@fensystems.co.uk> 0.1.7-1
 - zebconf: Apply timeout when opening network connections
 
