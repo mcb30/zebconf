@@ -27,6 +27,13 @@ class ZebraDevice(object):
     DEFAULT_TIMEOUT = 2.0
     """Timeout used when reading from device"""
 
+    ENCODING = 'cp437'
+    """Character encoding
+
+    Some device responses (notably the value of the
+    ``power.ascii_graph`` variable) use "ASCII graphics characters".
+    """
+
     def __init__(self, path=None, timeout=None):
         if path is None:
             self.conn = ZebraUsbConnection()
@@ -62,9 +69,11 @@ class ZebraDevice(object):
 
     def write(self, data, printable=True):
         """Write data to device"""
-        logger.debug('tx: %s',
-                     data.decode().strip() if printable else
-                     ''.join('%02x' % x for x in bytearray(data)))
+        logger.debug(
+            'tx: %s',
+            data.decode(self.ENCODING, errors='backslashreplace').strip()
+            if printable else ''.join('%02x' % x for x in bytearray(data))
+        )
         self.conn.write(data)
 
     def read(self, expect=None, printable=True):
@@ -79,9 +88,11 @@ class ZebraDevice(object):
             frag = self.conn.read(self.MAX_RESPONSE_LEN, self.timeout)
             if not frag:
                 break
-            logger.debug('rx: %s',
-                         frag.decode() if printable else
-                         ''.join('%02x' % x for x in bytearray(frag)))
+            logger.debug(
+                'rx: %s',
+                frag.decode(self.ENCODING, errors='backslashreplace')
+                if printable else ''.join('%02x' % x for x in bytearray(frag))
+            )
             data += frag
             if expect is not None and re.match(expect, data):
                 break
@@ -92,12 +103,12 @@ class ZebraDevice(object):
     def do(self, action, param=''):
         """Execute command"""
         self.write(b'! U1 do "%s" "%s"\r\n' %
-                   (action.encode(), param.encode()))
+                   (action.encode(self.ENCODING), param.encode(self.ENCODING)))
 
     def setvar(self, name, value):
         """Set variable value"""
         self.write(b'! U1 setvar "%s" "%s"\r\n' %
-                   (name.encode(), value.encode()))
+                   (name.encode(self.ENCODING), value.encode(self.ENCODING)))
 
     def setint(self, name, value):
         """Set integer variable value"""
@@ -109,8 +120,8 @@ class ZebraDevice(object):
 
     def getvar(self, name):
         """Get variable value"""
-        self.write(b'! U1 getvar "%s"\r\n' % name.encode())
-        value = self.read(br'".+?"$').decode()
+        self.write(b'! U1 getvar "%s"\r\n' % name.encode(self.ENCODING))
+        value = self.read(br'".+?"$').decode(self.ENCODING)
         if value == '"?"':
             raise UnknownVariableError(name)
         return value.strip('"')
@@ -139,7 +150,7 @@ class ZebraDevice(object):
     def list(self):
         """List files"""
         self.do('file.dir')
-        return self.read().decode().strip('"')
+        return self.read().decode(self.ENCODING).strip('"')
 
     def delete(self, filename):
         """Remove file"""
@@ -157,7 +168,8 @@ class ZebraDevice(object):
     def upload(self, filename, content):
         """Upload file"""
         self.write(b'! CISDFCRC16\r\n0000\r\n%s\r\n%08x\r\n0000\r\n%s' %
-                   (filename.encode(), len(content), content), printable=False)
+                   (filename.encode(self.ENCODING), len(content), content),
+                   printable=False)
 
     def upgrade(self, firmware):
         """Upgrade firmware"""
