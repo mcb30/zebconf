@@ -1,0 +1,11 @@
+<services>
+  <service name="tar_scm">
+    <param name="scm">git</param>
+    <param name="url">https://github.com/unipartdigital/zebconf.git</param>
+    <param name="filename">zebconf</param>
+  </service>
+    <service name="recompress">
+    <param name="file">*.tar</param>
+    <param name="compression">gz</param>
+  </service>
+</services>  

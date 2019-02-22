@@ -1,0 +1,30 @@
+Source: zebconf
+Maintainer: Michael Brown <mbrown@fensystems.co.uk>
+Section: python
+Priority: optional
+Build-Depends: python-setuptools (>= 0.6b3), python-all (>= 2.6.6-3), debhelper (>= 7.4.3)
+Standards-Version: 3.9.1
+
+
+
+Package: python-zebconf
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}
+Description: Zebra printer configuration
+ Zebra printer configuration tool
+ ================================
+ .
+ [![Build Status](https://travis-ci.org/unipartdigital/zebconf.svg?branch=master)](https://travis-ci.org/unipartdigital/zebconf)
+ .
+ This package provides a command-line configuration tool for Zebra
+ [printers](https://www.zebra.com/gb/en/products/printers.html).  For
+ example:
+ .
+ * Get product name: `zebconf get device.product_name`
+ * Set hostname: `zebconf set device.friendy_name myzq520`
+ * Configure WiFi: `zebconf wifi myessid -p mypassword`
+ * Upgrade firmware: `zebconf upgrade V76.20.15Z.zip`
+ .
+
+
+
