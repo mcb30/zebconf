@@ -10,7 +10,7 @@
 %endif
 
 Name:		python-%{srcname}
-Version:	0.1.8
+Version:	0.1.9
 Release:	1%{?dist}
 Summary:	Zebra printer configuration
 License:	GPLv2+
@@ -109,6 +109,9 @@ Zebra printer configuration library and command-line tool.
 %endif
 
 %changelog
+* Mon Mar 04 2019 Michael Brown <mbrown@fensystems.co.uk> 0.1.9-1
+- zebconf: Support the "power.ascii_graph" variable
+
 * Wed Feb 20 2019 Michael Brown <mbrown@fensystems.co.uk> 0.1.8-1
 - zebconf: Fix use of "zebconf set" for Python 2.7
 

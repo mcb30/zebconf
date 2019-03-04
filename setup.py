@@ -13,7 +13,7 @@ setup(
     author_email="mbrown@fensystems.co.uk",
     url="https://github.com/unipartdigital/zebconf",
     license="GPLv2+",
-    version="0.1.8",
+    version="0.1.9",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
