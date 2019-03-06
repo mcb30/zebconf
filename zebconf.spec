@@ -1,3 +1,27 @@
+%if %{_vendor} == "debbuild"
+%global _buildshell /bin/bash
+%endif
+
+%if %{_vendor} == "debbuild"
+%global pyinstflags --no-compile -O0
+%global pytargetflags --install-layout=deb
+%endif
+
+# For systems (mostly debian) that don't define these things -------------------
+%{!?__python2:%global __python2 /usr/bin/python2}
+%{!?__python3:%global __python3 /usr/bin/python3}
+
+%if %{undefined python2_sitearch}
+%global python2_sitearch %(%{__python2} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")
+%endif
+
+%if %{undefined python3_sitearch}
+%global python3_sitearch %(%{__python3} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")
+%endif
+
+%{!?py3dir: %global py3dir %{_builddir}/python3-%{name}-%{version}-%{release}}
+
+
 %global srcname zebconf
 
 %define with_py2 1
@@ -13,17 +37,33 @@ Name:		python-%{srcname}
 Version:	0.1.8
 Release:	1%{?dist}
 Summary:	Zebra printer configuration
-License:	GPLv2+
 URL:		https://github.com/unipartdigital/zebconf
 Source0:	%{name}-%{version}.tar.gz
 BuildArch:	noarch
+%if %{_vendor} == "debbuild"
+Packager: Mike Perlov <mike.perlov@unipart.io>
+License: GPL-2.0
+Group: python
+%else
+License:        GPLv2+
+%endif
 %if 0%{?with_py2}
+%if %{_vendor} == "debbuild"
+BuildRequires: python-dev
+BuildRequires: python-setuptools
+%else
 BuildRequires:	python2-devel
 BuildRequires:	python2-setuptools
 %endif
+%endif
 %if 0%{?with_py3}
+%if %{_vendor} == "debbuild"
+BuildRequires: python3-dev
+BuildRequires: python3-setuptools
+%else
 BuildRequires:	python3-devel
 BuildRequires:	python3-setuptools
+%endif
 %endif
 
 %description
@@ -32,17 +72,29 @@ Zebra printer configuration library and command-line tool.
 %if 0%{?with_py2}
 %package -n	python2-%{srcname}
 Summary:	%{summary}
+%if %{_vendor} == "debbuild"
+Requires:       python-future
+Requires:       python-passlib
+Requires:       python-usb
+Requires:       python-setuptools
+%else
 Requires:	python2-future
 Requires:	python2-passlib
 %if 0%{?rhel}
 Requires:	pyusb
 %else
 Requires:	python2-pyusb
-%endif
 Requires:	python2-setuptools
+%endif
+%endif
 %if 0%{?with_recommends}
+%if %{_vendor} == "debbuild"
+Recommends:     python-colorlog
+%else
 Recommends:	python2-colorlog
 %endif
+%endif
+
 %if ! 0%{?with_py3}
 Provides:	%{srcname} = %{version}-%{release}
 %endif
@@ -58,8 +110,12 @@ Zebra printer configuration library and command-line tool.
 Summary:	%{summary}
 Requires:	python3-future
 Requires:	python3-passlib
-Requires:	python3-pyusb
 Requires:	python3-setuptools
+%if %{_vendor} == "debbuild"
+Requires:	python3-usb
+%else
+Requires:	python3-pyusb
+%endif
 Recommends:	python3-colorlog
 Provides:	%{srcname} = %{version}-%{release}
 
@@ -74,26 +130,48 @@ Zebra printer configuration library and command-line tool.
 
 %build
 %if 0%{?with_py2}
+%if %{_vendor} == "debbuild"
+%{__python2} setup.py build
+%else
 %py2_build
 %endif
+%endif
 %if 0%{?with_py3}
+%if %{_vendor} == "debbuild"
+%{__python3} setup.py build
+%else
 %py3_build
 %endif
+%endif
+
 
 %install
 %if 0%{?with_py2}
+%if %{_vendor} == "debbuild"
+%{__python2} setup.py install --root %{buildroot} %{?pytargetflags}
+%else
 %py2_install
 %endif
+%endif
 %if 0%{?with_py3}
+%if %{_vendor} == "debbuild"
+%{__python3} setup.py install --root %{buildroot} %{?pytargetflags}
+%else
 %py3_install
+%endif
 %endif
 
 %if 0%{?with_py2}
 %files -n python2-%{srcname}
 %doc README.md
 %license COPYING
+%if %{_vendor} == "debbuild"
+%{python2_sitearch}/%{srcname}/
+%{python2_sitearch}/%{srcname}-%{version}-*.egg-info/
+%else
 %{python2_sitelib}/%{srcname}/
 %{python2_sitelib}/%{srcname}-%{version}-*.egg-info/
+%endif
 %if ! 0%{?with_py3}
 %{_bindir}/zebconf
 %endif
@@ -103,8 +181,13 @@ Zebra printer configuration library and command-line tool.
 %files -n python3-%{srcname}
 %doc README.md
 %license COPYING
+%if %{_vendor} == "debbuild"
+%{python3_sitearch}/%{srcname}/
+%{python3_sitearch}/%{srcname}-%{version}*.egg-info/
+%else
 %{python3_sitelib}/%{srcname}/
 %{python3_sitelib}/%{srcname}-%{version}-*.egg-info/
+%endif
 %{_bindir}/zebconf
 %endif
 
