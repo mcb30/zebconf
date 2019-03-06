@@ -2,7 +2,8 @@
   <service name="tar_scm">
     <param name="scm">git</param>
     <param name="url">https://github.com/unipartdigital/zebconf.git</param>
-    <param name="filename">zebconf</param>
+    <param name="filename">python-zebconf</param>
+    <param name="version">0.1.8</param>
     <param name="revision">unified_spec</param>
   </service>
     <service name="extract_file">
@@ -14,3 +15,4 @@
     <param name="compression">gz</param>
   </service>
 </services>  
+
